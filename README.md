@@ -1,4 +1,4 @@
-# Midterm Lab Task 2 - Data Cleansing and Preparation using Power Query
+# [Midterm Lab Task 2 - Data Cleansing and Preparation using Power Query](https://github.com/user-attachments/files/19259702/Book1.xlsx)
 For this task we are given an uncleaned raw data from Excel and we are tasked to perform Data CLeaning and Preparation using Power Query
 
 ### Step 1: Download and Load Data  
