@@ -1,1 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Midterm Lab Task 2 - Data Cleansing and Preparation</title>
+    <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --chrome-black: #000000;
+            --chrome-silver: #C0C0C0;
+            --chrome-white: #FFFFFF;
+            --cross-pink: #FFB6C1;
+            --cross-blue: #4169E1;
+            --cross-yellow: #FFD700;
+            --cross-red: #FF0000;
+            --cross-green: #00FF00;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M7,2 L17,12 L7,22 L7,2" fill="silver" stroke="white" stroke-width="1"/><text x="14" y="14" fill="white" font-size="8">♱</text></svg>') 7 12, auto;
+        }
+
+        /* Hover Cursor */
+        a:hover, button:hover, .logo:hover, .frame-corner:hover, ul li:hover, ol li:hover, .image-frame:hover, .main-title:hover {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M7,2 L17,12 L7,22 L7,2" fill="white" stroke="silver" stroke-width="1"/><text x="14" y="14" fill="silver" font-size="8">♱</text></svg>') 7 12, pointer;
+        }
+
+        body {
+            margin: 0;
+            padding: 2rem;
+            font-family: 'Playfair Display', serif;
+            color: var(--chrome-silver);
+            background: black;
+            line-height: 1.6;
+            font-size: 18px;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+            background: #000;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: linear-gradient(90deg, #000, #111);
+            border: 1px solid rgba(192, 192, 192, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #333, #666);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #444, #777);
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-logo {
+            font-family: 'UnifrakturCook', cursive;
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(145deg, #e0e0e0, #aaa, #f5f5f5, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: loadingColorCycle 2s infinite;
+        }
+
+        .loading-cross {
+            font-size: 3rem;
+            margin: 2rem 0;
+            animation: loadingSpin 2s infinite linear;
+            color: var(--chrome-silver);
+        }
+
+        .loading-bar-container {
+            width: 200px;
+            height: 2px;
+            background: rgba(192, 192, 192, 0.1);
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(
+                to right,
+                var(--chrome-silver),
+                var(--chrome-white),
+                var(--chrome-silver)
+            );
+            animation: loadingProgress 2s ease-out forwards;
+        }
+
+        .loading-text {
+            font-family: 'Playfair Display', cursive;
+            color: var(--chrome-silver);
+            font-size: 1.2rem;
+            letter-spacing: 3px;
+            margin-top: 1rem;
+            opacity: 0.8;
+        }
+
+        /* Content Styles */
+        .markdown-content {
+            max-width: 1200px;
+            margin: auto;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border: 2px solid var(--chrome-silver);
+            box-shadow: 0 0 20px rgba(192, 192, 192, 0.3);
+            position: relative;
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            transition: opacity 1s ease-in;
+        }
+
+        .markdown-content.loaded {
+            opacity: 1;
+        }
+
+        /* Title Styles */
+        .title-container {
+            position: relative;
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+        }
+
+        .main-title {
+            font-family: 'UnifrakturCook', cursive;
+            font-size: 3rem;
+            background: linear-gradient(45deg, #c0c0c0, #ffffff, #808080);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: all 0.3s ease;
+            padding: 1rem;
+            margin: 0;
+        }
+
+        .main-title a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Headings */
+        h2, h3, h4 {
+            font-family: 'UnifrakturCook', cursive;
+            color: var(--chrome-silver);
+            margin-top: 2rem;
+        }
+
+        /* Lists */
+        .markdown-content ul,
+        .markdown-content ol {
+            list-style: none;
+            padding-left: 2rem;
+        }
+
+        .markdown-content ul li,
+        .markdown-content ol li {
+            position: relative;
+            padding: 0.5rem 1rem;
+            margin: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .markdown-content ul li::before,
+        .markdown-content ol li::before {
+            content: '♱';
+            position: absolute;
+            left: -20px;
+            color: var(--chrome-silver);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .markdown-content ul li:hover,
+        .markdown-content ol li:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(20px);
+            padding-left: 2rem;
+        }
+
+        .markdown-content ul li:hover::before,
+        .markdown-content ol li:hover::before {
+            left: 5px;
+            opacity: 1;
+        }
+
+        /* Image Styles */
+        .image-frame {
+            position: relative;
+            margin: 2rem auto;
+            max-width: 800px;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid var(--chrome-silver);
+            transition: all 0.3s ease;
+        }
+
+        .image-frame:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(192, 192, 192, 0.3);
+        }
+
+        .image-frame img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Animations */
+        @keyframes loadingSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes loadingColorCycle {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        @keyframes loadingProgress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        /* Floating Crosses */
+        .colored-cross {
+            position: fixed;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.5;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-logo">Loading</div>
+            <div class="loading-cross">♱</div>
+            <div class="loading-bar-container">
+                <div class="loading-bar"></div>
+            </div>
+            <div class="loading-text">LOADING...</div>
+        </div>
+    </div>
+
+    <div class="markdown-content" id="mainContent">
+        <div class="title-container">
+            <h1 class="main-title">
+                <a href="https://github.com/user-attachments/files/19259702/Book1.xlsx">
+                    Midterm Lab Task 2 - Data Cleansing and Preparation using Power Query
+                </a>
+            </h1>
+        </div>
+
+        <p>For this task we are given an uncleaned raw data from Excel and we are tasked to perform Data Cleaning and Preparation using Power Query</p>
+
+        <h3>Step 1: Download and Load Data</h3>
+        <ol>
+            <li>Download the dataset (Uncleaned_DS_jobs.csv)</li>
+            <li>Open Excel</li>
+            <li>Go to Data → New Query → Open File → Text/CSV</li>
+            <li>Click Load and then Edit using Power Query Editor</li>
+        </ol>
+
+        <h3>Step 2: Duplicate Raw Data</h3>
+        <ol>
+            <li>Right-click the dataset in the Queries pane</li>
+            <li>Select Duplicate</li>
+        </ol>
+
+        <h3>Step 3: Clean Salary Data</h3>
+        <ol>
+            <li>Select the Salary Estimate column</li>
+            <li>Go to Transform Menu → Extract → Text Before Delimiter</li>
+            <li>Type "(" and click OK</li>
+            <li>Create two new columns: Min Salary and Max Salary
+                <ul>
+                    <li>Select Salary Estimate column → Add Column Menu → Column from Examples → From Selections</li>
+                    <li>Type the first min salary value and press Enter (all rows will auto-fill)</li>
+                    <li>Rename the column to "Min Sal"</li>
+                    <li>Repeat the process for Max Salary</li>
+                </ul>
+            </li>
+        </ol>
+
+        <!-- Continue with all other steps... -->
+        <!-- Previous content remains the same until Step 3 -->
+
+        <h3>Step 4: Add Role Type Column</h3>
+        <ol>
+            <li>Go to Add Column Menu → Custom Column</li>
+            <li>Rename the column to "Role Type"</li>
+            <li>Use this logic:
+                <ul>
+                    <li>If Job Title contains "Data Scientist" → Assign "Data Scientist"</li>
+                    <li>If Job Title contains "Data Analyst" → Assign "Data Analyst"</li>
+                    <li>If Job Title contains "Data Engineer" → Assign "Data Engineer"</li>
+                    <li>If Job Title contains "Machine Learning" → Assign "Machine Learning Engineer"</li>
+                    <li>Otherwise, assign "Other"</li>
+                </ul>
+            </li>
+            <li>Change the column type to Text</li>
+        </ol>
+
+        <h3>Step 5: Split Location Column</h3>
+        <ol>
+            <li>Select the Location column</li>
+            <li>Add a Custom Column with corrections:
+                <ul>
+                    <li>If Location = "New Jersey" → Assign ", NJ"</li>
+                    <li>If Location = "Remote" or "United States" → Assign ", Other"</li>
+                    <li>If Location = "Texas" → Assign ", TX"</li>
+                    <li>If Location = "California" → Assign ", CA"</li>
+                </ul>
+            </li>
+            <li>Click OK, then select the new column</li>
+            <li>Go to Transform → Split Column → By Delimiter (comma ",")</li>
+            <li>Click OK</li>
+            <li>Rename the second split column to "State Abbreviations"</li>
+            <li>Check and replace incorrect values (e.g., "Anne Rundell" → "MA")</li>
+        </ol>
+
+        <h3>Step 6: Split Size Column</h3>
+        <ol>
+            <li>Create two new columns: MinCompanySize and MaxCompanySize</li>
+            <li>Use the same method as Salary Estimate to split values</li>
+        </ol>
+
+        <h3>Step 7: Handle Negative Values</h3>
+        <ol>
+            <li>Filter out -1s from the Competitors column</li>
+            <li>Filter out 0s from the Revenues column</li>
+            <li>Remove -1s from the Industry column</li>
+        </ol>
+
+        <h3>Step 8: Clean Company Names</h3>
+        <ol>
+            <li>Remove any extra characters or ratings after company names</li>
+        </ol>
+
+        <h3>Step 9: Copy Cleaning Steps as Proof</h3>
+        <ol>
+            <li>Go to Home Menu → Click Advanced Editor</li>
+            <li>Copy and save the code in your portfolio</li>
+        </ol>
+
+        <h2>Step 10: Reshape and Group Data</h2>
+        
+        <h3>Group by Role Type</h3>
+        <ol>
+            <li>Duplicate the raw data → Rename it as "Sal By Role Type dup"</li>
+            <li>Select only Role Type, Min Salary, and Max Salary columns</li>
+            <li>Change Min and Max Salary type to currency</li>
+            <li>Multiply values by 1000 (Numbers Column → Standard → Multiply → Type 1000)</li>
+            <li>Group rows by Role Type and get the average for Min and Max Salary</li>
+        </ol>
+
+        <h3>Group by Company Size</h3>
+        <ol>
+            <li>Create a reference of raw data → Rename it as "Sal By Role Size ref"</li>
+            <li>Select only Size, Min Salary, and Max Salary columns</li>
+            <li>Change Min and Max Salary type to currency</li>
+            <li>Multiply values by 1000</li>
+            <li>Group rows by Size and get the average for Min and Max Salary</li>
+        </ol>
+
+        <h3>Step 11: Merge State Mapping</h3>
+        <ol>
+            <li>Click Unclean DS Jobs</li>
+            <li>Right-click in the Queries pane → New Query → Open Workbook State Mapping</li>
+            <li>Select the columns and click OK</li>
+            <li>Select Uncleaned DS Jobs query</li>
+            <li>Choose the State Abbreviation column in both queries</li>
+            <li>Click Merge → Click OK</li>
+            <li>Rename the merged column as "State Full Name"</li>
+            <li>Remove nulls and blanks</li>
+        </ol>
+
+        <h3>Step 12: Group by State</h3>
+        <ol>
+            <li>Create a reference of raw data → Rename it as "Sal By State ref"</li>
+            <li>Select only State Full Name, Min Salary, and Max Salary columns</li>
+            <li>Change Min and Max Salary type to currency</li>
+            <li>Multiply values by 1000</li>
+            <li>Group rows by State Full Name and get the average for Min and Max Salary</li>
+        </ol>
+
+        <h3>Step 13: View Query Dependencies</h3>
+        <ol>
+            <li>Go to View Menu → Click Dependencies</li>
+            <li>Check if all queries are correctly linked</li>
+        </ol>
+
+        <!-- Continue with the Output Screenshots--> 
+
+        <h2>Output Screenshots</h2>
+
+        <h3>Before Data Cleaning</h3>
+        <div class="image-frame">
+            <img src="https://github.com/user-attachments/assets/c45e215d-debc-473f-807a-f3eed521d884" alt="Before Data Cleaning">
+        </div>
+
+        <h3>After Data Cleaning</h3>
+        <div class="image-frame">
+            <img src="https://github.com/user-attachments/assets/f03d5f75-0315-4d61-8040-d717a165b44c" alt="After Data Cleaning">
+        </div>
+
+        <h3>Uncleaned_DSjobs Duplicate</h3>
+        <div class="image-frame">
+            <img src="https://github.com/user-attachments/assets/35564e0b-8ae7-4851-b7ff-5b9fc4718bf4" alt="Uncleaned_DSjobs Duplicate">
+        </div>
+
+        <h3>Advanced Editor</h3>
+        <div class="image-frame">
+            <img src="https://github.com/user-attachments/assets/390429fd-15ac-421e-9d21-5b073b8ae9ce" alt="Advanced Editor">
+        </div>
+
+        <h3>Salary By Role Type</h3>
+        <div class="image-frame">
+            <img src="https://github.com/user-attachments/assets/7f7c1b37-b44b-44d0-9c12-128976f893b5" alt="Salary By Role Type">
+        </div>
+
+        <h3>Salary By Role Size</h3>
+        <div class="image-frame">
+            <img src="https://github.com/user-attachments/assets/8af980b1-11f4-42a6-9326-3bcfbea04f8a" alt="Salary By Role Size">
+        </div>
+
+        <h3>Salary By State</h3>
+        <div class="image-frame">
+            <img src="https://github.com/user-attachments/assets/2f223eaf-3336-4a05-86fc-670de58e3000" alt="Salary By State">
+        </div>
+
+        <h3>Query Dependencies</h3>
+        <div class="image-frame">
+            <img src="https://github.com/user-attachments/assets/bf7b5f5f-357f-4a53-9954-818d9c1edd19" alt="Query Dependencies">
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const mainContent = document.getElementById('mainContent');
+            
+            // Loading sequence
+            setTimeout(() => {
+                loadingScreen.style.opacity = '0';
+                mainContent.classList.add('loaded');
+                
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }, 2000);
+
+            // Title 3D effect
+            const title = document.querySelector('.main-title');
+            title.addEventListener('mousemove', (e) => {
+                const rect = title.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const angleX = (y - centerY) / 10;
+                const angleY = (centerX - x) / 10;
+                
+                title.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg) scale(1.05)`;
+            });
+
+            title.addEventListener('mouseleave', () => {
+                title.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+            });
+
+            // Create floating colored crosses
+            function createColoredCross() {
+                const colors = ['#FFB6C1', '#4169E1', '#FFD700', '#FF0000', '#00FF00'];
+                const cross = document.createElement('div');
+                cross.className = 'colored-cross';
+                cross.innerHTML = '♱';
+                cross.style.left = Math.random() * window.innerWidth + 'px';
+                cross.style.fontSize = (20 + Math.random() * 20) + 'px';
+                cross.style.color = colors[Math.floor(Math.random() * colors.length)];
+                document.body.appendChild(cross);
+
+                setTimeout(() => {
+                    cross.remove();
+                }, 20000);
+            }
+
+            // Create initial crosses
+            for (let i = 0; i < 20; i++) {
+                createColoredCross();
+            }
+
+            // Add new crosses periodically
+            setInterval(createColoredCross, 2000);
+
+            // Image hover effects
+            const images = document.querySelectorAll('.image-frame');
+            images.forEach(image => {
+                image.addEventListener('mouseenter', () => {
+                    image.style.transform = 'scale(1.02)';
+                });
+                image.addEventListener('mouseleave', () => {
+                    image.style.transform = 'scale(1)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
