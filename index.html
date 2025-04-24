@@ -61,7 +61,7 @@
             background: linear-gradient(45deg, #444, #777);
         }
 
-        /* Loading Screen */
+        /* Enhanced Loading Screen */
         .loading-screen {
             position: fixed;
             top: 0;
@@ -79,16 +79,43 @@
 
         .loading-content {
             text-align: center;
+            position: relative;
+        }
+
+        .loading-content::before,
+        .loading-content::after {
+            content: '♱';
+            position: absolute;
+            font-size: 2rem;
+            color: var(--chrome-silver);
+            animation: rotateCross 4s linear infinite;
+        }
+
+        .loading-content::before {
+            left: -50px;
+            animation-delay: -2s;
+        }
+
+        .loading-content::after {
+            right: -50px;
+            animation-delay: -1s;
         }
 
         .loading-logo {
             font-family: 'UnifrakturCook', cursive;
             font-size: 4rem;
             margin-bottom: 2rem;
-            background: linear-gradient(145deg, #e0e0e0, #aaa, #f5f5f5, #888);
+            background: linear-gradient(145deg, 
+                #e0e0e0, #aaa, #f5f5f5, #888,
+                #e0e0e0, #aaa, #f5f5f5, #888
+            );
+            background-size: 200% 200%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: loadingColorCycle 2s infinite;
+            animation: loadingColorCycle 3s infinite;
+            text-shadow: 
+                0 0 20px rgba(255,255,255,0.2),
+                0 0 40px rgba(255,255,255,0.1);
         }
 
         .loading-cross {
@@ -96,15 +123,18 @@
             margin: 2rem 0;
             animation: loadingSpin 2s infinite linear;
             color: var(--chrome-silver);
+            text-shadow: 0 0 10px var(--chrome-silver);
         }
 
         .loading-bar-container {
-            width: 200px;
-            height: 2px;
+            width: 300px;
+            height: 3px;
             background: rgba(192, 192, 192, 0.1);
-            margin: 2rem 0;
+            margin: 2rem auto;
             position: relative;
             overflow: hidden;
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
         .loading-bar {
@@ -114,21 +144,23 @@
             height: 100%;
             width: 0%;
             background: linear-gradient(
-                to right,
+                90deg,
                 var(--chrome-silver),
                 var(--chrome-white),
                 var(--chrome-silver)
             );
             animation: loadingProgress 2s ease-out forwards;
+            box-shadow: 0 0 15px var(--chrome-silver);
         }
 
         .loading-text {
-            font-family: 'Playfair Display', cursive;
+            font-family: 'Playfair Display', serif;
             color: var(--chrome-silver);
             font-size: 1.2rem;
-            letter-spacing: 3px;
+            letter-spacing: 5px;
             margin-top: 1rem;
             opacity: 0.8;
+            animation: pulse 1.5s infinite;
         }
 
         /* Content Styles */
@@ -149,7 +181,7 @@
             opacity: 1;
         }
 
-        /* Title Styles */
+        /* Enhanced Title Styles */
         .title-container {
             position: relative;
             text-align: center;
@@ -158,20 +190,87 @@
         }
 
         .main-title {
+            position: relative;
+            display: inline-block;
             font-family: 'UnifrakturCook', cursive;
-            font-size: 3rem;
-            background: linear-gradient(45deg, #c0c0c0, #ffffff, #808080);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 3rem !important;
+            background: linear-gradient(45deg, #c0c0c0, #ffffff, #808080) !important;
+            -webkit-background-clip: text !important;
+            background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
             transition: all 0.3s ease;
-            padding: 1rem;
-            margin: 0;
+            padding: 1rem !important;
+            margin: 0 !important;
+            cursor: pointer;
         }
 
-        .main-title a {
-            text-decoration: none;
-            color: inherit;
+        .main-title::before,
+        .main-title::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent,
+                #FFB6C1, #4169E1, #FFD700, #FF0000, #00FF00,
+                transparent
+            );
+            transition: width 0.5s ease;
+        }
+
+        .main-title::before {
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+        }
+
+        .main-title::after {
+            right: 50%;
+            bottom: 0;
+            transform: translateX(50%);
+        }
+
+        .title-container:hover .main-title::before,
+        .title-container:hover .main-title::after {
+            width: 100%;
+        }
+
+        .title-container:hover .main-title {
+            text-shadow: 
+                0 0 10px rgba(255, 255, 255, 0.5),
+                0 0 20px rgba(255, 255, 255, 0.3),
+                0 0 30px rgba(255, 255, 255, 0.1);
+            letter-spacing: 2px;
+            transform: scale(1.05);
+        }
+
+        .title-container::before,
+        .title-container::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 2px;
+            height: 0;
+            background: linear-gradient(to bottom,
+                transparent,
+                var(--chrome-silver),
+                transparent
+            );
+            transition: height 0.3s ease;
+        }
+
+        .title-container::before {
+            left: 0;
+        }
+
+        .title-container::after {
+            right: 0;
+        }
+
+        .title-container:hover::before,
+        .title-container:hover::after {
+            height: 80%;
+            transform: translateY(-50%);
         }
 
         /* Headings */
@@ -282,13 +381,63 @@
                 opacity: 0;
             }
         }
+         /* Animations */
+        @keyframes colorShift {
+            0% {
+                background-position: 0% 50%;
+                filter: hue-rotate(0deg);
+            }
+            25% {
+                background-position: 100% 50%;
+                filter: hue-rotate(90deg);
+            }
+            50% {
+                background-position: 50% 100%;
+                filter: hue-rotate(180deg);
+            }
+            75% {
+                background-position: 50% 0%;
+                filter: hue-rotate(270deg);
+            }
+            100% {
+                background-position: 0% 50%;
+                filter: hue-rotate(360deg);
+            }
+        }
+
+        @keyframes rotateCross {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes loadingSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes loadingColorCycle {
+            0% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+            50% { background-position: 100% 50%; filter: hue-rotate(180deg); }
+            100% { background-position: 0% 50%; filter: hue-rotate(360deg); }
+        }
+
+        @keyframes loadingProgress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
     </style>
 </head>
 <body>
     <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
         <div class="loading-content">
-            <div class="loading-logo">Loading</div>
+            <div class="loading-logo">Midterm Lab Task 2</div>
             <div class="loading-cross">♱</div>
             <div class="loading-bar-container">
                 <div class="loading-bar"></div>
@@ -505,25 +654,25 @@
                 }, 500);
             }, 2000);
 
-            // Title 3D effect
-            const title = document.querySelector('.main-title');
-            title.addEventListener('mousemove', (e) => {
-                const rect = title.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                
-                const angleX = (y - centerY) / 10;
-                const angleY = (centerX - x) / 10;
-                
-                title.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg) scale(1.05)`;
-            });
+            // Title interaction effect
+        document.querySelector('.main-title').addEventListener('mousemove', (e) => {
+            const title = e.target;
+            const rect = title.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const angleX = (y - centerY) / 10;
+            const angleY = (centerX - x) / 10;
+            
+            title.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg) scale(1.05)`;
+        });
 
-            title.addEventListener('mouseleave', () => {
-                title.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
-            });
+        document.querySelector('.main-title').addEventListener('mouseleave', (e) => {
+            e.target.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+        });
 
             // Create floating colored crosses
             function createColoredCross() {
